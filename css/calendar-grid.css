@@ -1,0 +1,459 @@
+/* ========================================
+   CALENDAR GRID STYLES
+   Month view with task rows
+   ======================================== */
+
+/* Calendar Grid Container */
+.calendar-grid-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 var(--space-lg) var(--space-xl);
+}
+
+.calendar-grid-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.calendar-grid-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.calendar-grid-container::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: var(--radius-full);
+}
+
+.calendar-grid-container::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-light);
+}
+
+/* Day Headers Row */
+.calendar-day-headers {
+    display: grid;
+    grid-template-columns: 200px repeat(7, 1fr);
+    gap: var(--space-md);
+    padding: var(--space-md);
+    padding-left: var(--space-lg);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-md);
+}
+
+.day-header {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: var(--space-sm);
+}
+
+/* Task Row Container */
+.calendar-grid-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+/* Individual Task Row */
+.task-row {
+    display: grid;
+    grid-template-columns: 200px repeat(7, 1fr);
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-base);
+}
+
+.task-row:hover {
+    background: var(--color-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Task Info Column */
+.task-row-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    border-right: var(--glass-border);
+}
+
+.task-row-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.task-row-name {
+    font-size: 14px;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+/* Day Cells Container */
+.task-row-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-sm);
+}
+
+/* Individual Day Cell */
+.day-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.day-cell:hover {
+    background: var(--color-hover);
+}
+
+.day-cell:hover .day-number {
+    color: var(--color-text-primary);
+}
+
+/* Day Number (when not checked) */
+.day-number {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-tertiary);
+    transition: color var(--transition-fast);
+}
+
+/* Today Indicator */
+.day-cell.today {
+    border: 2px solid var(--color-text-primary);
+    animation: todayPulse 2s ease infinite;
+}
+
+.day-cell.today .day-number {
+    color: var(--color-text-primary);
+    font-weight: 700;
+}
+
+/* Other Month Days */
+.day-cell.other-month {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.day-cell.other-month:hover {
+    background: transparent;
+    transform: none;
+}
+
+/* Disabled Days */
+.day-cell.disabled {
+    pointer-events: none;
+}
+
+/* Checkbox Styles */
+.checkbox {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    background: var(--color-checkbox-bg);
+    border: 2px solid var(--color-border-light);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.checkbox:hover {
+    border-color: var(--color-accent);
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.checkbox:active {
+    transform: scale(0.95);
+}
+
+.checkbox.checked {
+    background: var(--color-checkbox-checked);
+    border-color: var(--color-checkbox-checked);
+    animation: checkbox-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Checkbox SVG Checkmark */
+.checkbox-svg {
+    width: 16px;
+    height: 16px;
+}
+
+.checkbox-svg .check-path {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: checkbox-check 0.3s ease forwards;
+    animation-delay: 0.05s;
+}
+
+/* Weekend Highlighting */
+.day-cell[data-day="6"],
+.day-cell[data-day="0"] {
+    /* Could add weekend styling here */
+}
+
+/* Calendar Navigation */
+.calendar-header {
+    padding: var(--space-xl) var(--space-lg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--color-bg-primary);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+}
+
+.month-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    background: var(--color-bg-secondary);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-lg);
+    border: var(--glass-border);
+}
+
+.current-month {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    padding: 0 var(--space-md);
+    color: var(--color-text-primary);
+    min-width: 180px;
+    text-align: center;
+}
+
+/* Navigation Buttons */
+.nav-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.nav-btn:hover {
+    background: var(--color-hover);
+    border-color: var(--color-border-light);
+    transform: scale(1.05);
+}
+
+.nav-btn:active {
+    transform: scale(0.95);
+}
+
+.nav-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.today-btn {
+    padding: var(--space-sm) var(--space-lg);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* Month Jump Selector */
+.month-jump {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+}
+
+.month-select,
+.year-select {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-bg-secondary);
+    border: var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    min-width: 120px;
+}
+
+.month-select:hover,
+.year-select:hover {
+    border-color: var(--color-border-light);
+    background: var(--color-hover);
+}
+
+.month-select:focus,
+.year-select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-hover);
+}
+
+/* Stats Bar */
+.stats-bar {
+    padding: var(--space-lg);
+    background: var(--color-bg-secondary);
+    border-top: var(--glass-border);
+}
+
+.stats-container {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.stat-card {
+    background: var(--color-bg-tertiary);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: 120px;
+    border: var(--glass-border);
+}
+
+.view-all-stats-btn {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--color-text-primary);
+    color: var(--color-bg-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.view-all-stats-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Empty State */
+.calendar-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    text-align: center;
+    color: var(--color-text-tertiary);
+}
+
+.calendar-empty-icon {
+    font-size: 64px;
+    margin-bottom: var(--space-md);
+    opacity: 0.5;
+}
+
+.calendar-empty h3 {
+    font-size: 18px;
+    margin: 0 0 var(--space-sm);
+    color: var(--color-text-secondary);
+}
+
+.calendar-empty p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Loading State */
+.calendar-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+    .calendar-grid-container {
+        padding: 0 var(--space-md) var(--space-lg);
+    }
+
+    .calendar-day-headers,
+    .task-row {
+        grid-template-columns: 150px repeat(7, 1fr);
+    }
+
+    .task-row-info {
+        padding: var(--space-sm) var(--space-sm);
+    }
+
+    .task-row-name {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendar-header {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .current-month {
+        font-size: 16px;
+        min-width: 140px;
+    }
+
+    .nav-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .today-btn {
+        padding: var(--space-xs) var(--space-md);
+        font-size: 12px;
+    }
+
+    .day-number {
+        font-size: 11px;
+    }
+
+    .checkbox {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+/* Week Indicator (Optional) */
+.week-number {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    text-align: center;
+    padding: var(--space-xs);
+}

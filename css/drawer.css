@@ -1,0 +1,579 @@
+/* ========================================
+   DAY DRAWER STYLES
+   Slide-out panel for day details
+   ======================================== */
+
+/* Drawer Container */
+.day-drawer {
+    width: var(--drawer-width);
+    height: 100%;
+    background: var(--color-bg-secondary);
+    border-left: var(--glass-border);
+    transform: translateX(100%);
+    transition: transform var(--transition-slow);
+    position: relative;
+    z-index: var(--z-sticky);
+    display: flex;
+    flex-direction: column;
+}
+
+.day-drawer.open {
+    transform: translateX(0);
+}
+
+.drawer-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.drawer-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.drawer-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.drawer-content::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: var(--radius-full);
+}
+
+/* Drawer Header */
+.drawer-header {
+    position: sticky;
+    top: 0;
+    background: var(--color-bg-secondary);
+    padding: var(--space-md) 0;
+    padding-right: 40px;
+    border-bottom: var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    z-index: 1;
+}
+
+.drawer-close {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    z-index: 2;
+}
+
+.drawer-close:hover {
+    background: var(--color-hover);
+    border-color: var(--color-border-light);
+}
+
+.drawer-close:active {
+    transform: scale(0.95);
+}
+
+.drawer-close svg {
+    width: 18px;
+    height: 18px;
+}
+
+.drawer-date {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--color-text-primary);
+    line-height: 1.3;
+}
+
+.drawer-dayname {
+    font-size: 14px;
+    color: var(--color-text-tertiary);
+    font-weight: 500;
+}
+
+/* Quick Actions */
+.drawer-quick-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+}
+
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--color-bg-tertiary);
+    border: var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.quick-action-btn:hover {
+    background: var(--color-hover);
+    border-color: var(--color-border-light);
+    transform: translateY(-1px);
+}
+
+.quick-action-btn:active {
+    transform: translateY(0);
+}
+
+.quick-action-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Progress Section */
+.day-progress {
+    background: var(--color-bg-tertiary);
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    border: var(--glass-border);
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.progress-header .stat-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.progress-percentage {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.progress-bar {
+    height: 10px;
+    background: var(--color-checkbox-bg);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--color-text-primary);
+    border-radius: var(--radius-full);
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 0%;
+}
+
+.progress-fill.success {
+    background: var(--color-success);
+}
+
+/* Task Checklist */
+.task-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    border: var(--glass-border);
+    transition: all var(--transition-fast);
+}
+
+.checklist-item:hover {
+    background: var(--color-hover);
+    border-color: var(--color-border-light);
+}
+
+.checklist-item.completed {
+    opacity: 0.6;
+}
+
+.checklist-checkbox {
+    flex-shrink: 0;
+}
+
+.checklist-label {
+    flex: 1;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    font-weight: 500;
+}
+
+.checklist-item.completed .checklist-label {
+    text-decoration: line-through;
+    color: var(--color-text-tertiary);
+}
+
+/* Mood Selector */
+.mood-selector {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    background: var(--color-bg-tertiary);
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    border: var(--glass-border);
+}
+
+.section-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.mood-options {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-sm);
+}
+
+.mood-btn {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-secondary);
+    border: var(--glass-border);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.mood-btn:hover {
+    background: var(--color-hover);
+    transform: scale(1.15);
+    border-color: var(--color-border-light);
+}
+
+.mood-btn.selected {
+    background: var(--color-text-primary);
+    border-color: var(--color-text-primary);
+    transform: scale(1.2);
+}
+
+.mood-emoji {
+    font-size: 26px;
+}
+
+.mood-selected {
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+    text-align: center;
+}
+
+/* Daily Notes */
+.daily-notes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.notes-textarea {
+    width: 100%;
+    padding: var(--space-md);
+    background: var(--color-bg-tertiary);
+    border: var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    transition: all var(--transition-fast);
+    min-height: 80px;
+}
+
+.notes-textarea::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.notes-textarea:focus {
+    outline: none;
+    border-color: var(--color-border-light);
+    background: var(--color-hover);
+    box-shadow: 0 0 0 3px var(--color-hover);
+}
+
+/* Journal Section */
+.journal-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--color-text-primary);
+}
+
+.section-title svg {
+    width: 18px;
+    height: 18px;
+    color: var(--color-text-tertiary);
+}
+
+.journal-textarea {
+    width: 100%;
+    padding: var(--space-md);
+    background: var(--color-bg-tertiary);
+    border: var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    transition: all var(--transition-fast);
+    min-height: 120px;
+}
+
+.journal-textarea::placeholder {
+    color: var(--color-text-tertiary);
+    font-style: italic;
+}
+
+.journal-textarea:focus {
+    outline: none;
+    border-color: var(--color-border-light);
+    background: var(--color-hover);
+    box-shadow: 0 0 0 3px var(--color-hover);
+}
+
+/* Save Button */
+.save-day-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    background: var(--color-text-primary);
+    color: var(--color-bg-primary);
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    margin-top: auto;
+}
+
+.save-day-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.save-day-btn:active {
+    transform: translateY(0);
+}
+
+.save-day-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Achievement Badge Area (Future) */
+.daily-achievements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+}
+
+.achievement-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-full);
+    border: var(--glass-border);
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.achievement-badge.unlocked {
+    background: var(--color-success-subtle);
+    border-color: var(--color-success);
+    color: var(--color-success);
+}
+
+/* Streak Fire Effect (Visual) */
+.streak-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 13px;
+    color: var(--color-text-tertiary);
+}
+
+.streak-fire {
+    font-size: 16px;
+    animation: flicker 1.5s ease-in-out infinite;
+}
+
+@keyframes flicker {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+/* Empty State */
+.drawer-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--color-text-tertiary);
+}
+
+.drawer-empty-icon {
+    font-size: 48px;
+    margin-bottom: var(--space-md);
+    opacity: 0.5;
+}
+
+.drawer-empty h4 {
+    font-size: 16px;
+    margin: 0 0 var(--space-sm);
+    color: var(--color-text-secondary);
+}
+
+.drawer-empty p {
+    font-size: 13px;
+    margin: 0;
+}
+
+/* Day Notes Preview */
+.day-notes-preview {
+    background: var(--color-bg-tertiary);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--color-text-tertiary);
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    font-style: italic;
+    line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    :root {
+        --drawer-width: 380px;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --drawer-width: 320px;
+    }
+
+    .drawer-content {
+        padding: var(--space-md);
+        gap: var(--space-md);
+    }
+
+    .drawer-date {
+        font-size: 18px;
+    }
+
+    .drawer-dayname {
+        font-size: 13px;
+    }
+
+    .quick-action-btn {
+        padding: var(--space-sm);
+        font-size: 12px;
+    }
+
+    .day-progress {
+        padding: var(--space-md);
+    }
+
+    .mood-btn {
+        width: 44px;
+        height: 44px;
+    }
+
+    .mood-emoji {
+        font-size: 22px;
+    }
+
+    .save-day-btn {
+        padding: var(--space-md);
+        font-size: 14px;
+    }
+}
+
+/* Drawer Overlay (for mobile) */
+.drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: calc(var(--z-sticky) - 1);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base);
+}
+
+.drawer-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+    .day-drawer {
+        position: fixed;
+        right: 0;
+        top: 0;
+        max-width: 90vw;
+    }
+
+    .drawer-overlay {
+        display: block;
+    }
+}
+
+@media (min-width: 769px) {
+    .drawer-overlay {
+        display: none;
+    }
+}

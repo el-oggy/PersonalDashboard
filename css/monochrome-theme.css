@@ -1,0 +1,219 @@
+/* ========================================
+   MONOCHROME THEME SYSTEM
+   Pure black & white with subtle grays
+   ======================================== */
+
+/* CSS Custom Properties - Dark Theme (Default) */
+:root.theme-dark {
+    /* Primary Palette - Monochrome */
+    --color-bg-primary: #000000;
+    --color-bg-secondary: #0a0a0a;
+    --color-bg-tertiary: #121212;
+    --color-bg-glass: rgba(18, 18, 18, 0.7);
+    --color-bg-glass-light: rgba(18, 18, 18, 0.5);
+
+    /* Text Colors */
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #b0b0b0;
+    --color-text-tertiary: #6b6b6b;
+    --color-text-muted: #4a4a4a;
+
+    /* Border & Dividers */
+    --color-border: rgba(255, 255, 255, 0.08);
+    --color-border-light: rgba(255, 255, 255, 0.15);
+
+    /* Accent - Only used sparingly */
+    --color-accent: #ffffff;
+    --color-accent-muted: rgba(255, 255, 255, 0.3);
+
+    /* Success & States */
+    --color-success: #2ecc71;
+    --color-success-subtle: rgba(46, 204, 113, 0.15);
+    --color-error: #e74c3c;
+    --color-error-subtle: rgba(231, 76, 60, 0.15);
+
+    /* Checkbox & Interactive */
+    --color-checkbox-bg: rgba(255, 255, 255, 0.1);
+    --color-checkbox-checked: #ffffff;
+    --color-checkbox-check: #000000;
+    --color-hover: rgba(255, 255, 255, 0.05);
+    --color-active: rgba(255, 255, 255, 0.1);
+
+    /* Shadows - Soft & Layered */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.7);
+    --shadow-inner: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+
+    /* Glass Effect */
+    --backdrop-blur: blur(20px);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.25s ease;
+    --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    /* Sidebar Width */
+    --sidebar-width: 280px;
+    --drawer-width: 420px;
+
+    /* Z-Index Scale */
+    --z-base: 0;
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-modal: 300;
+    --z-tooltip: 400;
+}
+
+/* Light Theme */
+:root.theme-light {
+    /* Primary Palette - Monochrome */
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f5f5f5;
+    --color-bg-tertiary: #ececec;
+    --color-bg-glass: rgba(245, 245, 245, 0.7);
+    --color-bg-glass-light: rgba(245, 245, 245, 0.5);
+
+    /* Text Colors */
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #4a4a4a;
+    --color-text-tertiary: #7a7a7a;
+    --color-text-muted: #9a9a9a;
+
+    /* Border & Dividers */
+    --color-border: rgba(0, 0, 0, 0.08);
+    --color-border-light: rgba(0, 0, 0, 0.12);
+
+    /* Accent */
+    --color-accent: #1a1a1a;
+    --color-accent-muted: rgba(26, 26, 26, 0.3);
+
+    /* Success & States */
+    --color-success: #27ae60;
+    --color-success-subtle: rgba(39, 174, 96, 0.1);
+    --color-error: #e74c3c;
+    --color-error-subtle: rgba(231, 76, 60, 0.1);
+
+    /* Checkbox & Interactive */
+    --color-checkbox-bg: rgba(0, 0, 0, 0.06);
+    --color-checkbox-checked: #1a1a1a;
+    --color-checkbox-check: #ffffff;
+    --color-hover: rgba(0, 0, 0, 0.03);
+    --color-active: rgba(0, 0, 0, 0.06);
+
+    /* Shadows - Lighter shadows for light theme */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.12);
+    --shadow-inner: inset 0 2px 8px rgba(0, 0, 0, 0.04);
+
+    /* Glass Effect */
+    --backdrop-blur: blur(20px);
+    --glass-border: 1px solid rgba(0, 0, 0, 0.08);
+
+    /* Same border radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+
+    /* Same spacing & transitions */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.25s ease;
+    --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    --sidebar-width: 280px;
+    --drawer-width: 420px;
+
+    --z-base: 0;
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-modal: 300;
+    --z-tooltip: 400;
+}
+
+/* Default to dark theme class on body */
+body {
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'SF Pro Display', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+/* Glass Effect */
+.glass {
+    background: var(--color-bg-glass);
+    backdrop-filter: var(--backdrop-blur);
+    -webkit-backdrop-filter: var(--backdrop-blur);
+    border: var(--glass-border);
+}
+
+/* Text Gradients - Subtle */
+.text-gradient {
+    background: linear-gradient(135deg, var(--color-text-primary), var(--color-text-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Icon Sizes */
+.icon-xs { width: 14px; height: 14px; }
+.icon-sm { width: 16px; height: 16px; }
+.icon-md { width: 20px; height: 20px; }
+.icon-lg { width: 24px; height: 24px; }
+.icon-xl { width: 32px; height: 32px; }
+
+/* Flex Utilities */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-xs { gap: var(--space-xs); }
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }
+
+/* Spacing Utilities */
+.p-xs { padding: var(--space-xs); }
+.p-sm { padding: var(--space-sm); }
+.p-md { padding: var(--space-md); }
+.p-lg { padding: var(--space-lg); }
+.m-xs { margin: var(--space-xs); }
+.m-sm { margin: var(--space-sm); }
+.m-md { margin: var(--space-md); }
+.m-lg { margin: var(--space-lg); }
