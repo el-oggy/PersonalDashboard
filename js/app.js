@@ -22,108 +22,401 @@ const App = (() => {
     return QUOTES[dayIndex % QUOTES.length];
   }
 
+  function greeting() {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 18) return 'Good afternoon';
+    return 'Good evening';
+  }
+
   /* ---------------- Dashboard ---------------- */
   function renderDashboard(container) {
     const stats = Habits.todayCompletionStats();
     const events = CalendarView.todaysEvents();
     const quote = todaysQuote();
     const xp = State.get('xp').total;
-    const { level } = UI.levelFromXP(xp);
-    const activity = State.get('activity').slice(0, 8);
-    const bestStreak = Habits.getHabits().reduce((m, h) => Math.max(m, Habits.computeStreak(h.id)), 0);
+    const { level, into, need } = UI.levelFromXP(xp);
+    const activity = State.get('activity').slice(0, 6);
+    const habits = Habits.getHabits().filter(h => h.active !== false);
+    const bestStreak = habits.reduce((m, h) => Math.max(m, Habits.computeStreak(h.id)), 0);
     const pStats = Projects.stats();
+    const projects = Projects.getProjects();
+    const goals = Goals.getGoals();
+    const notesCount = Notes.count();
+
+    // Weekly trend data
+    const weekDays = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const today = new Date();
+    const weekStart = Utils.startOfWeek(today, 1);
+    const weeklyData = weekDays.map((label, i) => {
+      const d = Utils.addDays(weekStart, i);
+      const key = Utils.dateKey(d);
+      const done = habits.filter(h => Habits.isDone(h.id, key)).length;
+      return { label, value: done, isToday: Utils.isSameDay(d, today) };
+    });
+    const maxWeekly = Math.max(1, ...weeklyData.map(d => d.value));
+
+    // Days since start (streak context)
+    const todayPct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
+    const xpPct = Utils.clamp((into / need) * 100, 0, 100);
 
     container.innerHTML = `
       <div class="view">
-        <div class="dashboard-grid">
-          ${statCard('✅', `${stats.done}/${stats.total}`, "Today's Habits", 'var(--cat-1)')}
-          ${statCard('🔥', bestStreak + 'd', 'Longest Active Streak', 'var(--cat-3)')}
-          ${statCard('🚀', 'Lv ' + level, 'Current Level', 'var(--cat-2)')}
-          ${statCard('📋', `${pStats.doneCards}/${pStats.totalCards}`, 'Tasks Completed', 'var(--cat-6)')}
+
+        <!-- ═══════ HERO ═══════ -->
+        <div class="dash-hero">
+          <div class="dash-greeting">
+            <h1>${greeting()}! 👋</h1>
+            <div class="greeting-sub">${dailyMotivation()} · Keep the flow going.</div>
+          </div>
+          <div class="dash-hero-date">${Utils.formatDate(new Date(), { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</div>
         </div>
 
-        <div class="dashboard-main-grid">
-          <div class="card panel">
-            <div class="section-heading"><h2>Today's Habits</h2><span class="hint">${Utils.formatDate(new Date(), { weekday: 'long', month: 'short', day: 'numeric' })}</span></div>
-            <div id="dash-today-habits"></div>
-          </div>
-
-          <div class="card panel" style="display:flex; flex-direction:column; gap:18px;">
-            <div>
-              <div class="section-heading"><h2>Daily Progress</h2></div>
-              <div class="progress-ring-wrap">
-                ${Charts.ringSVG({ size: 128, stroke: 11, percent: stats.pct, color: 'var(--accent-violet)' })}
-              </div>
-              <div style="text-align:center;">
-                <div class="progress-ring-num">${stats.pct}%</div>
-                <div class="progress-ring-sub">${stats.done} of ${stats.total} habits done</div>
-              </div>
-            </div>
-            <div class="card quote-card" style="background:var(--surface-2);">
-              <div class="quote-text">${Utils.escapeHtml(quote.text)}</div>
-              <div class="quote-author">— ${Utils.escapeHtml(quote.author)}</div>
-            </div>
-          </div>
+        <!-- ═══════ STAT CARDS ═══════ -->
+        <div class="dash-stats">
+          ${statCard('✅', `${stats.done}/${stats.total}`, "Today's Habits", todayPct >= 100 ? 'var(--accent-green)' : 'var(--accent-violet)', todayPct >= 100 ? '+Perfect day!' : todayPct >= 50 ? '★ More than halfway' : '—')}
+          ${statCard('🔥', bestStreak + 'd', 'Best Active Streak', 'var(--accent-amber)', bestStreak >= 7 ? '★ On a roll!' : bestStreak > 0 ? 'Building momentum' : 'Start today!')}
+          ${statCard('🚀', 'Lv ' + level, 'Current Level', 'var(--accent-teal)', xp.total + ' total XP · ' + into + '/' + need + ' to next')}
+          ${statCard('📋', pStats.totalCards, 'Tasks / Notes', 'var(--accent-rose)', pStats.doneCards + ' done · ' + notesCount + ' notes')}
         </div>
 
-        <div class="dashboard-main-grid">
-          <div class="card panel">
-            <div class="section-heading"><h2>Activity Heatmap</h2><span class="hint">Last 20 weeks</span></div>
-            <div class="mini-heatmap-wrap" id="dash-heatmap"></div>
-            <div class="heatmap-legend"><span>Less</span>
-              <div class="heatmap-cell" style="background:var(--surface-2);"></div>
-              <div class="heatmap-cell" style="background:#2a5636;"></div>
-              <div class="heatmap-cell" style="background:#3d7d4d;"></div>
-              <div class="heatmap-cell" style="background:#4fae66;"></div>
-              <div class="heatmap-cell" style="background:var(--accent-green);"></div>
-              <span>More</span>
+        <!-- ═══════ MAIN TWO-COLUMN ═══════ -->
+        <div class="dash-columns">
+
+          <!-- ─── LEFT COLUMN ─── -->
+          <div>
+
+            <!-- Today's Habits -->
+            <div class="card dash-panel">
+              <div class="dash-panel-header">
+                <div class="dash-panel-title">
+                  <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+                  Today's Habits
+                </div>
+                <span class="dash-panel-badge">${stats.done}/${stats.total} done</span>
+              </div>
+              <div id="dash-today-habits"></div>
             </div>
+
+            <!-- Weekly Trend -->
+            <div class="card dash-panel" style="margin-top:20px;">
+              <div class="dash-panel-header">
+                <div class="dash-panel-title">
+                  <svg viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+                  Weekly Trend
+                </div>
+                <span class="dash-panel-badge">This week</span>
+              </div>
+              <div class="dash-chart-wrap">
+                <div class="dash-week-bars">
+                  ${weeklyData.map(d => `
+                    <div class="dash-bar-col">
+                      <div class="dash-bar-value">${d.value}</div>
+                      <div class="dash-bar" style="height:${Math.max(4, (d.value / maxWeekly) * 80)}px; background:${d.isToday ? 'var(--gradient-brand)' : 'var(--accent-violet)'}; opacity:${d.isToday ? 1 : 0.55};">
+                        <div class="dash-bar-tooltip">${d.value} completed</div>
+                      </div>
+                      <div class="dash-bar-label" style="${d.isToday ? 'color:var(--accent); font-weight:600;' : ''}">${d.label}</div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+
+            <!-- Goals at a Glance -->
+            ${goals.length ? `
+            <div class="card dash-panel" style="margin-top:20px;">
+              <div class="dash-panel-header">
+                <div class="dash-panel-title">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+                  Goals at a Glance
+                </div>
+                <span class="dash-panel-badge">${goals.length} active</span>
+              </div>
+              <div>
+                ${goals.map(g => {
+                  const pct = Goals.goalProgress(g);
+                  const dl = g.deadline ? Utils.daysBetween(new Date(), Utils.keyToDate(g.deadline)) : null;
+                  return `
+                  <div class="dash-goal-item" data-goal="${g.id}">
+                    <div class="dash-goal-top">
+                      <div class="dash-goal-icon" style="background:${g.color}22;">${g.icon}</div>
+                      <span class="dash-goal-name">${Utils.escapeHtml(g.title)}</span>
+                      <span class="dash-goal-pct" style="color:${g.color}">${pct}%</span>
+                    </div>
+                    <div class="dash-goal-track">
+                      <div class="dash-goal-fill" style="width:${pct}%; background:${g.color};"></div>
+                    </div>
+                    <div class="dash-goal-deadline">${dl !== null ? (dl >= 0 ? dl + ' days left' : Math.abs(dl) + ' days overdue') : 'No deadline'}</div>
+                  </div>`;
+                }).join('')}
+              </div>
+            </div>` : ''}
+
           </div>
 
-          <div class="card panel">
-            <div class="section-heading"><h2>Recent Activity</h2></div>
-            <div id="dash-activity">
-              ${activity.length ? activity.map(a => `
-                <div class="activity-row">
-                  <div class="activity-dot" style="background:${activityColor(a.type)};"></div>
-                  <div>
-                    <div class="activity-text">${a.text}</div>
-                    <div class="activity-time">${Utils.relativeTime(a.ts)}</div>
+          <!-- ─── RIGHT COLUMN ─── -->
+          <div>
+
+            <!-- Daily Progress Ring -->
+            <div class="card dash-panel">
+              <div class="dash-panel-header">
+                <div class="dash-panel-title">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
+                  Daily Progress
+                </div>
+                <span class="dash-panel-badge">${Utils.formatDate(new Date(), { month: 'short', day: 'numeric' })}</span>
+              </div>
+              <div class="dash-progress-wrap">
+                <div class="dash-progress-ring">
+                  ${Charts.ringSVG({ size: 140, stroke: 12, percent: todayPct, color: 'var(--accent-violet)' })}
+                  <div class="dash-progress-center">
+                    <div class="dash-progress-pct">${todayPct}%</div>
+                    <div class="dash-progress-label">complete</div>
                   </div>
-                </div>`).join('') : `<p style="color:var(--text-tertiary); font-size:13px;">No activity yet — complete a habit to get started.</p>`}
+                </div>
+                <div class="dash-progress-detail">
+                  <div class="dash-progress-stat">
+                    <div class="dash-progress-stat-num" style="color:var(--accent-green);">${stats.done}</div>
+                    <div class="dash-progress-stat-label">Done</div>
+                  </div>
+                  <div class="dash-progress-stat">
+                    <div class="dash-progress-stat-num">${stats.total}</div>
+                    <div class="dash-progress-stat-label">Total</div>
+                  </div>
+                  <div class="dash-progress-stat">
+                    <div class="dash-progress-stat-num" style="color:var(--accent-amber);">${bestStreak}d</div>
+                    <div class="dash-progress-stat-label">Streak</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quote -->
+              <div class="card dash-quote" style="background:var(--surface-2);">
+                <div class="dash-quote-text">${Utils.escapeHtml(quote.text)}</div>
+                <div class="dash-quote-author">— ${Utils.escapeHtml(quote.author)}</div>
+              </div>
+
+              <!-- XP Bar -->
+              <div class="dash-xp-bar">
+                <div class="dash-xp-track">
+                  <div class="dash-xp-fill" style="width:${xpPct}%;"></div>
+                </div>
+                <div class="dash-xp-labels">
+                  <span>Level ${level}</span>
+                  <span>${into} / ${need} XP</span>
+                  <span>Level ${level + 1}</span>
+                </div>
+              </div>
             </div>
+
+            <!-- Today's Schedule -->
+            ${events.length ? `
+            <div class="card dash-panel" style="margin-top:20px;">
+              <div class="dash-panel-header">
+                <div class="dash-panel-title">
+                  <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+                  Today's Schedule
+                </div>
+                <span class="dash-panel-badge">${events.length} events</span>
+              </div>
+              <div class="dash-schedule-list">
+                ${events.map(e => `
+                  <div class="dash-event-item">
+                    <div class="dash-event-time">${e.startTime ? Utils.formatTime12(e.startTime) : 'All day'}</div>
+                    <div class="dash-event-bar" style="background:${e.color};"></div>
+                    <div class="dash-event-title">${Utils.escapeHtml(e.title)}</div>
+                    ${e.endTime ? `<div class="dash-event-dots">→ ${Utils.formatTime12(e.endTime)}</div>` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </div>` : ''}
+
+            <!-- Activity Feed -->
+            <div class="card dash-panel" style="margin-top:20px;">
+              <div class="dash-panel-header">
+                <div class="dash-panel-title">
+                  <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                  Activity
+                </div>
+                <span class="dash-panel-badge">Latest</span>
+              </div>
+              <div class="dash-activity-list">
+                ${activity.length ? activity.map(a => `
+                  <div class="dash-activity-item">
+                    <div class="dash-activity-dot" style="background:${activityColor(a.type)};"></div>
+                    <div>
+                      <div class="dash-activity-text">${a.text}</div>
+                      <div class="dash-activity-time">${Utils.relativeTime(a.ts)}</div>
+                    </div>
+                  </div>
+                `).join('') : `
+                <div class="dash-empty">
+                  <div class="dash-empty-icon">✨</div>
+                  <p>No activity yet — complete a habit to get started.</p>
+                </div>`}
+              </div>
+            </div>
+
           </div>
         </div>
 
-        ${events.length ? `
-        <div class="card panel">
-          <div class="section-heading"><h2>Today's Schedule</h2></div>
-          <div class="day-view-list">
-            ${events.map(e => `
-              <div class="day-event-row" style="padding:10px 4px;">
-                <div class="day-event-time">${e.startTime ? Utils.formatTime12(e.startTime) : 'All day'}</div>
-                <div class="day-event-bar" style="background:${e.color};"></div>
-                <div class="day-event-title">${Utils.escapeHtml(e.title)}</div>
-              </div>`).join('')}
+        <!-- ═══════ PROJECT PULSE ═══════ -->
+        ${projects.length ? `
+        <div class="dash-column-full">
+          <div class="card dash-panel">
+            <div class="dash-panel-header">
+              <div class="dash-panel-title">
+                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M9 4v17M15 4v17"/></svg>
+                Project Pulse
+              </div>
+              <span class="dash-panel-badge">${pStats.doneCards}/${pStats.totalCards} tasks done</span>
+            </div>
+            ${projects.map(p => {
+              const pPct = Projects.projectProgress(p);
+              const doneCol = p.columns[p.columns.length - 1];
+              const done = p.cards.filter(c => c.columnId === doneCol.id).length;
+              return `
+              <div class="dash-project-item">
+                <div class="dash-project-dot" style="background:${p.color};"></div>
+                <div class="dash-project-info">
+                  <div class="dash-project-name">${Utils.escapeHtml(p.name)}</div>
+                  <div class="dash-project-meta">${done}/${p.cards.length} tasks · ${p.columns.filter((_, i) => i < p.columns.length - 1).length} active columns</div>
+                </div>
+                <div class="dash-project-track">
+                  <div class="dash-project-fill" style="width:${pPct}%; background:${p.color};"></div>
+                </div>
+                <div class="dash-project-stat" style="color:${p.color}">${pPct}%</div>
+              </div>`;
+            }).join('')}
           </div>
         </div>` : ''}
+
+        <!-- ═══════ QUICK ACTIONS ═══════ -->
+        <div class="dash-column-full" style="margin-top:24px;">
+          <div class="dash-actions">
+            <button class="dash-action-btn" id="qa-habit">
+              <div class="dash-action-icon" style="background:var(--cat-1)22;">🧘</div>
+              <div>
+                <div class="dash-action-label">New Habit</div>
+                <div class="dash-action-hint">Track a daily behavior</div>
+              </div>
+            </button>
+            <button class="dash-action-btn" id="qa-note">
+              <div class="dash-action-icon" style="background:var(--cat-2)22;">📝</div>
+              <div>
+                <div class="dash-action-label">New Note</div>
+                <div class="dash-action-hint">Capture a thought</div>
+              </div>
+            </button>
+            <button class="dash-action-btn" id="qa-task">
+              <div class="dash-action-icon" style="background:var(--cat-3)22;">✅</div>
+              <div>
+                <div class="dash-action-label">New Task</div>
+                <div class="dash-action-hint">Add to a project board</div>
+              </div>
+            </button>
+            <button class="dash-action-btn" id="qa-event">
+              <div class="dash-action-icon" style="background:var(--cat-4)22;">🗓️</div>
+              <div>
+                <div class="dash-action-label">New Event</div>
+                <div class="dash-action-hint">Schedule something</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
       </div>
     `;
 
-    Habits.renderTodayList(container.querySelector('#dash-today-habits'));
-    Charts.renderHeatmapGrid(container.querySelector('#dash-heatmap'), Habits.aggregateHeatmapData(), 20, 11);
+    // Wire up today's habits (interactive check-off)
+    renderTodayListDashboard(container.querySelector('#dash-today-habits'));
+
+    // Wire up quick actions
+    container.querySelector('#qa-habit').onclick = () => Habits.openHabitModal();
+    container.querySelector('#qa-note').onclick = () => Notes.createAndOpen();
+    container.querySelector('#qa-task').onclick = () => Projects.openCardModal();
+    container.querySelector('#qa-event').onclick = () => CalendarView.openEventModal();
+
+    // Wire up goal clicks → navigate to goals
+    container.querySelectorAll('[data-goal]').forEach(el => {
+      el.style.cursor = 'pointer';
+      el.onclick = () => UI.navigate('goals');
+    });
+  }
+
+  /* ─── Interactive habit list for dashboard ─── */
+  function renderTodayListDashboard(container) {
+    const habits = Habits.getHabits().filter(h => h.active !== false);
+    const today = Utils.todayKey();
+    if (!habits.length) {
+      container.innerHTML = `
+        <div class="dash-empty">
+          <div class="dash-empty-icon">✨</div>
+          <h3>No habits yet</h3>
+          <p>Create your first habit to start tracking.</p>
+        </div>`;
+      return;
+    }
+    container.innerHTML = habits.map(h => {
+      const done = Habits.isDone(h.id, today);
+      const streak = Habits.computeStreak(h.id);
+      return `
+      <div class="today-habit-item" data-hid="${h.id}">
+        <button class="habit-check-ring ${done ? 'is-done' : ''}" data-toggle="${h.id}" aria-label="Toggle ${Utils.escapeHtml(h.name)}">
+          <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+        </button>
+        <div class="habit-item-icon" style="background:${h.color}22;">${h.icon}</div>
+        <div class="habit-item-info">
+          <div class="habit-item-name ${done ? 'is-done' : ''}">${Utils.escapeHtml(h.name)}</div>
+          <div class="habit-item-meta">
+            <span class="habit-item-cat" style="background:${h.color}22; color:${h.color};">${Utils.escapeHtml(h.category || 'Other')}</span>
+            ${h.targetTime ? `<span>${Utils.formatTime12(h.targetTime)}</span>` : ''}
+          </div>
+        </div>
+        ${streak > 0 ? `<div class="habit-item-streak">🔥 ${streak}</div>` : ''}
+      </div>`;
+    }).join('');
+
+    container.querySelectorAll('[data-toggle]').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.toggle;
+        const nowDone = Habits.toggleDone(id);
+        renderDashboard(document.getElementById('view-container'));
+        UI.updateSidebarLevel();
+        if (nowDone) UI.confetti();
+        else UI.toast('Unchecked', 'info');
+      };
+    });
+  }
+
+  function dailyMotivation() {
+    const msgs = [
+      'Small steps lead to big results',
+      'Your future self will thank you',
+      'Consistency beats intensity',
+      'Make today count',
+      'Progress, not perfection',
+      'One day at a time',
+      'You\'ve got this',
+      'Stay in the flow',
+    ];
+    return msgs[Math.floor(Date.now() / 86400000) % msgs.length];
   }
 
   function activityColor(type) {
     return { habit: 'var(--accent-green)', project: 'var(--accent-blue)', goal: 'var(--accent-amber)', note: 'var(--accent-teal)', achievement: 'var(--accent-rose)', level: 'var(--accent-violet)', calendar: 'var(--accent-blue)' }[type] || 'var(--text-tertiary)';
   }
 
-  function statCard(icon, value, label, color) {
+  function statCard(icon, value, label, color, trend) {
     return `
-    <div class="card stat-card">
-      <div class="stat-card-top"><div class="stat-icon" style="background:${color}22;">${icon}</div></div>
-      <div class="stat-value">${value}</div>
-      <div class="stat-label">${label}</div>
+    <div class="card dash-stat-card">
+      <div class="dash-stat-icon" style="background:${color}18; color:${color};">${icon}</div>
+      <div class="dash-stat-body">
+        <div class="dash-stat-value">${value}</div>
+        <div class="dash-stat-label">${label}</div>
+        ${trend && trend !== '—' ? `<div class="dash-stat-trend ${trend.includes('Perfect') || trend.includes('half') || trend.includes('roll') ? 'up' : ''}">${trend}</div>` : ''}
+      </div>
     </div>`;
   }
 

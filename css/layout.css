@@ -208,6 +208,8 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-float);
   transition: background-color var(--dur-theme), border-color var(--dur-theme);
+  position: relative;
+  z-index: 30;
 }
 
 .topbar-left { display: flex; align-items: center; gap: 16px; min-width: 0; }
