@@ -116,7 +116,8 @@ const DayDrawer = {
         const dayName = document.getElementById('drawer-dayname');
 
         if (dateDisplay && dayName) {
-            const date = new Date(this.currentDate + 'T00:00:00');
+            const [y, m, d] = this.currentDate.split('-').map(Number);
+            const date = new Date(y, m - 1, d);
             dateDisplay.textContent = date.toLocaleDateString('en-US', {
                 month: 'long',
                 day: 'numeric',

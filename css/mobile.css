@@ -1,0 +1,860 @@
+/* ==========================================================================
+   Habit Tracker — mobile.css
+   Consolidated responsive rules for tablet (≤1024px), phone (≤768px),
+   and small phone (≤480px). Mobile-first overrides that stack on top
+   of the existing CSS without duplication.
+   ========================================================================== */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TABLET: ≤1024px
+   Sidebar collapsed by default, Kanban 2-col, 3-col stats, tighter pad
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  :root {
+    --shell-pad: 8px;
+  }
+
+  /* Sidebar: collapsed icons-only by default on tablet */
+  .app-shell .sidebar {
+    width: var(--sidebar-w-collapsed);
+  }
+  .app-shell .brand-name,
+  .app-shell .nav-item span:not(.nav-icon),
+  .app-shell .level-text,
+  .app-shell .nav-shortcut {
+    display: none;
+  }
+  .app-shell .level-chip {
+    justify-content: center;
+  }
+
+  /* Tablet: topbar shrink a bit */
+  .topbar {
+    padding: 0 12px;
+  }
+  .date-chip {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  /* Dashboard: 3-col stat cards on tablet */
+  .dash-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Kanban: 2 columns on tablet */
+  .kanban-board {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Notes: narrower sidebar */
+  .notes-layout {
+    grid-template-columns: 220px 1fr;
+  }
+
+  /* Goals: already single column from 900px in goals.css */
+
+  /* Bottom nav: still hidden on tablet (sidebar nav works) */
+  .bottom-nav { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PHONE: ≤768px
+   Slide-out sidebar, bottom nav, single-column layouts, touch targets
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  :root {
+    --shell-pad: 6px;
+  }
+
+  /* ─── BODY / SHELL ─── */
+  body {
+    overflow-y: auto;
+    height: 100dvh;
+    width: 100dvw;
+  }
+
+  .app-shell {
+    padding: 4px;
+    gap: 6px;
+    flex-direction: column;
+    height: 100dvh;
+  }
+
+  /* ─── SIDEBAR → slide-out overlay ─── */
+  .sidebar {
+    position: fixed !important;
+    top: 0;
+    left: -100%;
+    width: 280px;
+    height: 100dvh;
+    height: 100vh; /* fallback */
+    z-index: 50;
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+    transition: left var(--dur-med) var(--ease-out);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .app-shell.sidebar-open .sidebar {
+    left: 0;
+  }
+
+  /* Override desktop collapse class on mobile */
+  .app-shell.sidebar-collapsed .sidebar {
+    width: 280px;
+  }
+  .app-shell.sidebar-collapsed .brand-name,
+  .app-shell.sidebar-collapsed .nav-item span:not(.nav-icon),
+  .app-shell.sidebar-collapsed .level-text,
+  .app-shell.sidebar-collapsed .nav-shortcut {
+    display: flex;
+  }
+  .app-shell.sidebar-collapsed .level-chip {
+    justify-content: flex-start;
+  }
+
+  .sidebar-brand {
+    padding-top: 8px;
+  }
+
+  /* Sidebar scrim */
+  .sidebar-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 49;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-med) var(--ease-out);
+  }
+  .sidebar-scrim.is-active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ─── TOPBAR ─── */
+  .topbar {
+    height: 48px;
+    padding: 0 12px;
+    border-radius: var(--radius-md);
+    z-index: 30;
+    position: relative;
+  }
+  .topbar-left {
+    gap: 10px;
+  }
+  .page-title {
+    font-size: 16px;
+  }
+
+  /* Hide non-essential topbar items */
+  .search-box,
+  .date-chip,
+  .theme-switch,
+  .notif-btn-wrap,
+  #theme-switch-slot,
+  #notif-btn,
+  #notif-btn-wrap {
+    display: none !important;
+  }
+
+  /* Keep quick-add but smaller */
+  #quick-add-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* ─── BOTTOM NAV BAR ─── */
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: var(--bg-topbar);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border-top: 1px solid var(--border-subtle);
+    z-index: 30;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 4px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    color: var(--text-tertiary);
+    font-size: 10px;
+    font-weight: 500;
+    transition: color var(--dur-fast), background var(--dur-fast);
+    min-width: 44px;
+    min-height: 42px;
+  }
+
+  .bottom-nav-item svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .bottom-nav-item.is-active {
+    color: var(--accent);
+  }
+
+  .bottom-nav-item:active {
+    background: var(--surface-2);
+  }
+
+  /* ─── VIEW CONTAINER ─── */
+  .main-content {
+    flex: 1;
+    min-height: 0;
+    gap: 6px;
+    padding-bottom: 56px; /* bottom nav space */
+  }
+
+  .view-container {
+    padding: 2px 2px 8px;
+  }
+
+  .view {
+    max-width: 100%;
+  }
+
+  /* ─── DASHBOARD ─── */
+  .dash-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .dash-stat-card {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .dash-stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    font-size: 18px;
+  }
+  .dash-stat-value {
+    font-size: 24px;
+  }
+  .dash-stat-label {
+    font-size: 11px;
+  }
+  .dash-hero {
+    margin-bottom: 16px;
+  }
+  .dash-greeting h1 {
+    font-size: 22px;
+  }
+  .dash-hero-date {
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+  .dash-columns {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .dash-panel {
+    padding: 16px 18px;
+  }
+  .dash-panel-header {
+    margin-bottom: 12px;
+  }
+  .dash-panel-title {
+    font-size: 14px;
+  }
+  .dash-week-bars {
+    gap: 6px;
+    height: 100px;
+  }
+  .dash-bar {
+    max-width: 30px;
+  }
+  .dash-progress-ring svg {
+    width: 110px;
+    height: 110px;
+  }
+  .dash-progress-pct {
+    font-size: 28px;
+  }
+  .dash-quote {
+    padding: 14px 16px;
+  }
+  .dash-quote-text {
+    font-size: 14px;
+  }
+  .dash-xp-labels {
+    font-size: 9px;
+  }
+  /* Dashboard today habits */
+  .today-habit-item {
+    gap: 10px;
+    padding: 8px 4px;
+  }
+  .habit-check-ring {
+    width: 44px;
+    height: 44px;
+  }
+  .habit-check-ring svg {
+    width: 18px;
+    height: 18px;
+  }
+  .habit-item-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+  }
+  .habit-item-name {
+    font-size: 14px;
+  }
+  .habit-item-streak {
+    font-size: 12px;
+  }
+  .habit-item-cat {
+    font-size: 11px;
+  }
+
+  /* ─── KANBAN ─── */
+  .kanban-board {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    overflow-x: visible;
+  }
+  .kanban-col {
+    min-height: auto;
+    padding: 12px;
+  }
+  .kanban-col-title {
+    font-size: 13px;
+  }
+  .kanban-card {
+    padding: 14px 16px;
+  }
+  .kanban-card-title {
+    font-size: 14px;
+  }
+  /* Column move buttons for touch */
+  .kanban-card-move {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .kanban-move-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border-radius: var(--radius-round);
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+    transition: all var(--dur-fast);
+  }
+  .kanban-move-btn:hover,
+  .kanban-move-btn:active {
+    background: var(--surface-3);
+    color: var(--text-primary);
+  }
+  .kanban-move-col {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .kanban-col-selector {
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    font-size: 13px;
+  }
+  .add-card-btn {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  /* ─── NOTES ─── */
+  .notes-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    gap: 12px;
+  }
+  .notes-sidebar {
+    max-height: 35vh;
+    overflow-y: auto;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+  }
+  .note-item {
+    padding: 14px 12px;
+  }
+  .note-item-title {
+    font-size: 14px;
+  }
+  .note-item-preview {
+    font-size: 12px;
+  }
+  .note-editor {
+    padding: 16px;
+    min-height: 50vh;
+  }
+  .note-editor-title {
+    font-size: 20px;
+  }
+  .note-editor-body {
+    font-size: 15px;
+  }
+  /* Back button for mobile notes */
+  .note-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 12px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+  }
+  .note-back-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+  }
+
+  /* ─── CALENDAR ─── */
+  .month-grid {
+    gap: 2px;
+  }
+  .month-day-header {
+    font-size: 10px;
+    padding: 4px 2px;
+  }
+  .month-day-cell {
+    min-height: 36px;
+    padding: 3px 4px;
+    font-size: 12px;
+  }
+  .week-grid {
+    grid-template-columns: 40px repeat(7, 1fr);
+  }
+  .week-hour {
+    font-size: 9px;
+  }
+  .day-view-list {
+    gap: 6px;
+  }
+  .day-event-row {
+    padding: 8px 4px;
+  }
+  .day-event-time {
+    font-size: 11px;
+    min-width: 48px;
+  }
+  .day-event-title {
+    font-size: 13px;
+  }
+  .calendar-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .calendar-toolbar h2 {
+    font-size: 16px;
+  }
+
+  /* ─── HABITS ─── */
+  .habits-toolbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .filter-pill {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+  .habit-card {
+    padding: 14px 12px;
+    flex-wrap: wrap;
+  }
+  .habit-card-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+  .habit-card-name {
+    font-size: 14px;
+  }
+  .habit-card-meta {
+    font-size: 11px;
+    flex-wrap: wrap;
+  }
+  /* Larger week dots for touch */
+  .week-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    font-size: 10px;
+  }
+  /* Hide drag handle on touch */
+  .drag-handle {
+    display: none;
+  }
+  /* Reorder buttons for touch */
+  .habit-reorder-btns {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .habit-reorder-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-2);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    font-size: 16px;
+    cursor: pointer;
+    transition: all var(--dur-fast);
+  }
+  .habit-reorder-btn:hover,
+  .habit-reorder-btn:active {
+    background: var(--surface-3);
+    color: var(--text-primary);
+  }
+
+  /* ─── GOALS ─── */
+  .goals-grid {
+    gap: 12px;
+  }
+  .goal-card {
+    padding: 16px;
+    gap: 12px;
+  }
+  .goal-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  .goal-title {
+    font-size: 14px;
+  }
+  .milestone-row {
+    padding: 10px 8px;
+  }
+  .milestone-check {
+    width: 24px;
+    height: 24px;
+  }
+  .milestone-text {
+    font-size: 13px;
+  }
+
+  /* ─── ACHIEVEMENTS ─── */
+  .xp-hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+    gap: 16px;
+  }
+  .xp-hero-level {
+    font-size: 22px;
+  }
+  .badge-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .badge-card {
+    padding: 16px 10px;
+  }
+  .badge-emoji {
+    font-size: 28px;
+  }
+  .badge-name {
+    font-size: 12px;
+  }
+
+  /* ─── ANALYTICS ─── */
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .dashboard-main-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .panel {
+    padding: 16px;
+  }
+
+  /* ─── SETTINGS ─── */
+  .field-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* ─── MODALS ─── */
+  .modal-panel {
+    width: 94vw;
+    max-height: 82vh;
+    padding: 20px;
+    border-radius: var(--radius-md);
+  }
+  .modal-header h2 {
+    font-size: 17px;
+  }
+  .modal-footer {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .modal-footer .btn {
+    flex: 1;
+    min-width: 80px;
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  /* ─── FORMS ─── */
+  .field input[type="text"],
+  .field input[type="number"],
+  .field input[type="time"],
+  .field input[type="date"],
+  .field input[type="datetime-local"],
+  .field select,
+  .field textarea {
+    font-size: 16px; /* prevents iOS zoom */
+    padding: 12px 14px;
+  }
+
+  .field label {
+    font-size: 11px;
+  }
+
+  /* ─── TOASTS ─── */
+  .toast-stack {
+    bottom: 64px; /* above bottom nav */
+    right: 10px;
+    left: 10px;
+    align-items: stretch;
+  }
+  .toast {
+    min-width: auto;
+    max-width: none;
+    font-size: 12px;
+    padding: 12px 14px;
+  }
+
+  /* ─── COMMAND PALETTE ─── */
+  .palette-panel {
+    width: 94vw;
+    max-height: 50vh;
+  }
+  .palette-input-row input {
+    font-size: 16px;
+  }
+  .palette-option {
+    padding: 12px 10px;
+  }
+  .palette-option .p-label {
+    font-size: 14px;
+  }
+
+  /* ─── ICON BUTTONS ─── */
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+  .icon-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* ─── HEATMAP ─── */
+  .heatmap-cell {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+  }
+
+  /* ─── CONFETTI ─── */
+  /* performance: fewer pieces on mobile (handled in JS) */
+
+  /* ─── NOTIFICATIONS dropdown ─── */
+  .notif-dropdown {
+    width: 280px;
+    right: -20px;
+  }
+
+  /* ─── CONTEXT MENU ─── */
+  .context-menu button {
+    font-size: 14px;
+    padding: 12px 14px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SMALL PHONE: ≤480px
+   Single-column everything, minimum chrome, maximum touch targets
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  :root {
+    --shell-pad: 4px;
+  }
+
+  .app-shell {
+    padding: 2px;
+    gap: 4px;
+  }
+
+  .topbar {
+    height: 44px;
+    padding: 0 8px;
+  }
+  .page-title {
+    font-size: 14px;
+  }
+
+  /* Dashboard: single stat column */
+  .dash-stats {
+    grid-template-columns: 1fr;
+  }
+  .dash-stat-card {
+    padding: 12px 14px;
+  }
+  .dash-stat-value {
+    font-size: 22px;
+  }
+  .dash-greeting h1 {
+    font-size: 19px;
+  }
+  .dash-hero-date {
+    font-size: 10px;
+  }
+  .dash-week-bars {
+    gap: 3px;
+    height: 80px;
+  }
+  .dash-bar {
+    max-width: 22px;
+  }
+  .dash-bar-label {
+    font-size: 9px;
+  }
+  .dash-bar-value {
+    font-size: 9px;
+  }
+  .dash-actions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .dash-action-btn {
+    padding: 12px 14px;
+  }
+  .dash-project-item {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 0;
+  }
+  .dash-project-track {
+    width: 100%;
+  }
+  .dash-quote::before {
+    font-size: 48px;
+    top: -4px;
+    left: 6px;
+  }
+
+  /* Kanban: tighter */
+  .kanban-card-move {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* Notes: sidebar smaller */
+  .notes-sidebar {
+    max-height: 30vh;
+  }
+
+  /* Habits: week dots stacked or smaller */
+  .week-dot {
+    width: 22px;
+    height: 22px;
+    font-size: 9px;
+  }
+  .habit-card-week {
+    gap: 3px;
+  }
+
+  /* Achievements: single badge column */
+  .badge-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Analytics: single stats column */
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Calendar: compact */
+  .month-day-cell {
+    min-height: 32px;
+    padding: 2px 3px;
+    font-size: 11px;
+  }
+  .month-day-header {
+    font-size: 9px;
+  }
+  .month-nav {
+    gap: 4px;
+  }
+  .nav-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Bottom nav: tighter labels */
+  .bottom-nav-item span {
+    font-size: 9px;
+  }
+  .bottom-nav-item svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Heatmap: larger cells for visibility */
+  .heatmap-cell {
+    width: 12px;
+    height: 12px;
+    gap: 2px;
+  }
+  .heatmap-grid {
+    gap: 2px;
+  }
+}

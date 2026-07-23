@@ -314,7 +314,7 @@ const Habits = (() => {
         </div>
 
         <div class="habit-list" id="habit-list">
-          ${habits.length ? habits.map(h => habitCardHTML(h, weekDates)).join('') : `<div class="empty-state"><div class="empty-icon">🗂️</div><h3>Nothing in this category</h3><p>Try another filter or add a new habit.</p></div>`}
+          ${habits.length ? habits.map((h, i) => habitCardHTML(h, weekDates, i, habits.length)).join('') : `<div class="empty-state"><div class="empty-icon">🗂️</div><h3>Nothing in this category</h3><p>Try another filter or add a new habit.</p></div>`}
         </div>
       </div>
     `;
@@ -326,7 +326,13 @@ const Habits = (() => {
     });
     container.querySelector('#add-habit-btn').onclick = () => openHabitModal();
 
+    const isTouch = window.innerWidth <= 768;
+
     container.querySelectorAll('.habit-card').forEach(card => {
+      // Show reorder buttons on touch devices
+      const reorderDiv = card.querySelector('.habit-reorder-btns');
+      if (reorderDiv && isTouch) reorderDiv.style.display = 'flex';
+
       card.querySelectorAll('[data-week-toggle]').forEach(dot => {
         dot.onclick = (e) => {
           e.stopPropagation();
@@ -353,6 +359,19 @@ const Habits = (() => {
         ]);
       };
 
+      // Reorder buttons (touch)
+      card.querySelectorAll('[data-reorder]').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const dir = btn.dataset.reorder; // 'up' or 'down'
+          const habitsVisible = getHabits().filter(h => activeFilter === 'All' || h.category === activeFilter);
+          const idx = habitsVisible.findIndex(h => h.id === card.dataset.id);
+          if (dir === 'up' && idx > 0) reorder(habitsVisible[idx].id, habitsVisible[idx - 1].id);
+          if (dir === 'down' && idx < habitsVisible.length - 1) reorder(habitsVisible[idx].id, habitsVisible[idx + 1].id);
+          renderView(container);
+        };
+      });
+
       card.setAttribute('draggable', 'true');
       card.addEventListener('dragstart', () => card.classList.add('is-dragging'));
       card.addEventListener('dragend', () => card.classList.remove('is-dragging'));
@@ -370,9 +389,14 @@ const Habits = (() => {
     });
   }
 
-  function habitCardHTML(h, weekDates) {
+  function habitCardHTML(h, weekDates, index, total) {
     const streak = computeStreak(h.id);
     const best = computeBestStreak(h.id);
+    const reorderBtns = `
+      <div class="habit-reorder-btns" style="display:none;">
+        ${index > 0 ? `<button class="habit-reorder-btn" data-reorder="up" title="Move up"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg></button>` : `<span style="width:32px;"></span>`}
+        ${index < total - 1 ? `<button class="habit-reorder-btn" data-reorder="down" title="Move down"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>` : `<span style="width:32px;"></span>`}
+      </div>`;
     return `
     <div class="card habit-card" data-id="${h.id}">
       <span class="drag-handle"><svg viewBox="0 0 10 18" fill="currentColor"><circle cx="2" cy="2" r="1.5"/><circle cx="8" cy="2" r="1.5"/><circle cx="2" cy="9" r="1.5"/><circle cx="8" cy="9" r="1.5"/><circle cx="2" cy="16" r="1.5"/><circle cx="8" cy="16" r="1.5"/></svg></span>
@@ -394,6 +418,7 @@ const Habits = (() => {
         }).join('')}
       </div>
       <div class="habit-card-streak"><span class="num">🔥${streak}</span><span class="lbl">streak</span></div>
+      ${reorderBtns}
       <div class="habit-card-actions">
         <button class="icon-btn" data-edit title="Edit"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>
         <button class="icon-btn" data-menu title="More"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>

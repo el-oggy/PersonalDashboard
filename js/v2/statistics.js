@@ -207,11 +207,41 @@ const Statistics = {
     },
 
     /**
+     * Helper to compute perfect day streaks
+     */
+    getPerfectDayStreaks(dailyCompletion) {
+        let longest = 0;
+        let current = 0;
+
+        for (const day of dailyCompletion) {
+            if (day.completed === day.total && day.total > 0) {
+                current++;
+                longest = Math.max(longest, current);
+            } else {
+                current = 0;
+            }
+        }
+
+        let activeCurrent = 0;
+        const reversed = [...dailyCompletion].reverse();
+        for (const day of reversed) {
+            if (day.completed === day.total && day.total > 0) {
+                activeCurrent++;
+            } else {
+                break;
+            }
+        }
+
+        return { longest, current: activeCurrent };
+    },
+
+    /**
      * Generate a summary report
      */
     generateReport() {
         const stats = this.getOverallStats(30);
         const trends = this.getTrends();
+        const streaks = this.getPerfectDayStreaks(stats.dailyCompletion);
 
         return {
             title: 'FlowOS 30-Day Report',
@@ -220,8 +250,8 @@ const Statistics = {
             tasksCompleted: stats.totalCompleted,
             perfectDays: stats.perfectDays,
             streak: {
-                longest: Math.max(...stats.dailyCompletion.map(d => d/perfectDays)),
-                current: FlowOSStorage.getCurrentStreak()
+                longest: streaks.longest,
+                current: streaks.current
             },
             trend: trends.overall.trend,
             averagePerDay: stats.averagePerDay

@@ -597,6 +597,89 @@ const App = (() => {
     updateNotifDot();
   }
 
+  /* ---------------- Mobile Helpers ---------------- */
+  function isMobileWidth() {
+    return window.innerWidth <= 768;
+  }
+
+  function isTabletWidth() {
+    return window.innerWidth > 768 && window.innerWidth <= 1024;
+  }
+
+  function closeMobileSidebar() {
+    const shell = document.getElementById('app-shell');
+    const scrim = document.getElementById('sidebar-scrim');
+    shell.classList.remove('sidebar-open');
+    scrim.classList.remove('is-active');
+  }
+
+  function openMobileSidebar() {
+    const shell = document.getElementById('app-shell');
+    const scrim = document.getElementById('sidebar-scrim');
+    shell.classList.add('sidebar-open');
+    scrim.classList.add('is-active');
+  }
+
+  function wireSidebarToggle() {
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const shell = document.getElementById('app-shell');
+
+    // Restore persisted sidebar state on desktop
+    if (!isMobileWidth() && State.get('settings').sidebarCollapsed) {
+      shell.classList.add('sidebar-collapsed');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      if (isMobileWidth()) {
+        // Phone: slide-out overlay
+        if (shell.classList.contains('sidebar-open')) {
+          closeMobileSidebar();
+        } else {
+          openMobileSidebar();
+        }
+      } else {
+        // Tablet/desktop: icon shrink
+        shell.classList.toggle('sidebar-collapsed');
+        State.get('settings').sidebarCollapsed = shell.classList.contains('sidebar-collapsed');
+        State.save('settings');
+      }
+    });
+
+    // Auto-close mobile sidebar when window resizes to desktop
+    window.addEventListener('resize', Utils.debounce(() => {
+      if (!isMobileWidth()) {
+        closeMobileSidebar();
+      }
+    }, 100));
+  }
+
+  function wireBottomNav() {
+    const items = document.querySelectorAll('.bottom-nav-item[data-route]');
+    items.forEach(item => {
+      item.addEventListener('click', () => {
+        UI.navigate(item.dataset.route);
+        // Update active state
+        items.forEach(i => i.classList.remove('is-active'));
+        item.classList.add('is-active');
+      });
+    });
+  }
+
+  function updateBottomNavActive(route) {
+    document.querySelectorAll('.bottom-nav-item[data-route]').forEach(item => {
+      item.classList.toggle('is-active', item.dataset.route === route);
+    });
+  }
+
+  /* ---------------- Service Worker ---------------- */
+  function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {
+        // Fail silently — SW is a progressive enhancement
+      });
+    }
+  }
+
   /* ---------------- Bootstrap ---------------- */
   async function init() {
     await State.load();
@@ -611,19 +694,22 @@ const App = (() => {
     UI.registerView('achievements', Achievements.renderView);
     UI.registerView('settings', renderSettings);
 
+    // Sidebar navigation
     document.querySelectorAll('.nav-item[data-route]').forEach(el => {
-      el.addEventListener('click', () => UI.navigate(el.dataset.route));
+      el.addEventListener('click', () => {
+        UI.navigate(el.dataset.route);
+        closeMobileSidebar();
+      });
     });
 
-    document.getElementById('sidebar-toggle').addEventListener('click', () => {
-      const shell = document.getElementById('app-shell');
-      shell.classList.toggle('sidebar-collapsed');
-      State.get('settings').sidebarCollapsed = shell.classList.contains('sidebar-collapsed');
-      State.save('settings');
-    });
-    if (State.get('settings').sidebarCollapsed) {
-      document.getElementById('app-shell').classList.add('sidebar-collapsed');
-    }
+    // Sidebar toggle: dual-mode — desktop shrink vs mobile slide-out
+    wireSidebarToggle();
+
+    // Mobile: close sidebar when tapping scrim
+    document.getElementById('sidebar-scrim').addEventListener('click', closeMobileSidebar);
+
+    // Bottom nav bar (mobile)
+    wireBottomNav();
 
     document.getElementById('quick-add-btn').addEventListener('click', UI.openQuickAdd);
     document.addEventListener('keydown', (e) => {
@@ -640,12 +726,29 @@ const App = (() => {
     wireNotifications();
     Theme.init();
 
-    document.getElementById('topbar-date').textContent = Utils.formatDate(new Date(), { weekday: 'short', month: 'short', day: 'numeric' });
+    // Date display - shorter on mobile
+    const dateEl = document.getElementById('topbar-date');
+    if (dateEl) {
+      dateEl.textContent = isMobileWidth()
+        ? Utils.formatDate(new Date(), { weekday: 'short', month: 'short', day: 'numeric' })
+        : Utils.formatDate(new Date(), { weekday: 'short', month: 'short', day: 'numeric' });
+    }
 
     UI.updateSidebarLevel();
 
     // Re-render sidebar level whenever xp/achievements change anywhere.
     State.on('xp', () => UI.updateSidebarLevel());
+
+    // Register service worker for offline support
+    registerServiceWorker();
+
+    // Override UI.navigate to also update bottom nav + close mobile sidebar
+    const origNavigate = UI.navigate;
+    UI.navigate = function(route) {
+      origNavigate(route);
+      updateBottomNavActive(route);
+      if (isMobileWidth()) closeMobileSidebar();
+    };
 
     const initialRoute = (window.location.hash || '').replace('#', '') || 'dashboard';
     UI.navigate(['dashboard', 'habits', 'calendar', 'projects', 'goals', 'notes', 'stats', 'achievements', 'settings'].includes(initialRoute) ? initialRoute : 'dashboard');
@@ -658,7 +761,7 @@ const App = (() => {
 
 document.addEventListener('DOMContentLoaded', () => {
   App.init().catch(err => {
-    console.error('FlowOS failed to start', err);
-    document.getElementById('view-container').innerHTML = `<div class="empty-state"><h3>FlowOS couldn't start</h3><p>${Utils.escapeHtml(err.message || String(err))}</p></div>`;
+    console.error('Habit Tracker failed to start', err);
+    document.getElementById('view-container').innerHTML = `<div class="empty-state"><h3>Habit Tracker couldn't start</h3><p>${Utils.escapeHtml(err.message || String(err))}</p></div>`;
   });
 });

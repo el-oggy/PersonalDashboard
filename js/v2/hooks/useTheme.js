@@ -18,13 +18,20 @@ function useTheme() {
         FlowOSStorage.updateSetting('theme', theme);
 
         // Update document class
-        document.body.classList.remove('theme-dark', 'theme-light');
+        document.body.classList.remove('theme-dark', 'theme-light', 'theme-nordic', 'theme-amber', 'theme-tokyo');
         document.body.classList.add(`theme-${theme}`);
 
         // Update meta theme-color
+        const themeColors = {
+            dark: '#0a0a0a',
+            light: '#ffffff',
+            nordic: '#090e0c',
+            amber: '#000000',
+            tokyo: '#0a0b10'
+        };
         const metaThemeColor = document.querySelector('meta[name="theme-color"]');
         if (metaThemeColor) {
-            metaThemeColor.setAttribute('content', theme === 'dark' ? '#1a1a1a' : '#ffffff');
+            metaThemeColor.setAttribute('content', themeColors[theme] || '#0a0a0a');
         }
 
         // Announce to screen readers
@@ -32,11 +39,14 @@ function useTheme() {
     };
 
     /**
-     * Toggle between dark and light
+     * Cycle through all theme presets
      */
     const toggleTheme = () => {
+        const themes = ['dark', 'light', 'nordic', 'amber', 'tokyo'];
         const current = getTheme();
-        const newTheme = current === 'dark' ? 'light' : 'dark';
+        const currentIndex = themes.indexOf(current);
+        const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % themes.length;
+        const newTheme = themes[nextIndex];
         setTheme(newTheme);
         return newTheme;
     };

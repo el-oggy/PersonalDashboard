@@ -35,6 +35,14 @@
                 CalendarGrid.init();
                 DayDrawer.init();
 
+                // Set up sheet tab navigation
+                this.setupSheetTabs();
+
+                // Initialize the spreadsheet planner
+                if (window.SpreadsheetPlanner) {
+                    SpreadsheetPlanner.init();
+                }
+
                 // Set up view all stats button
                 this.setupStatsButton();
 

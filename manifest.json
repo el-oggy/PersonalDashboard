@@ -1,12 +1,12 @@
 {
-    "name": "FlowOS",
-    "short_name": "FlowOS",
-    "description": "Personal productivity system - track habits and tasks",
+    "name": "Habit Tracker",
+    "short_name": "Habit Tracker",
+    "description": "Track daily habits, manage projects, set goals, and journal your progress — all offline, all private.",
     "start_url": "./index.html",
     "display": "standalone",
-    "background_color": "#000000",
-    "theme_color": "#1a1a1a",
-    "orientation": "portrait-primary",
+    "background_color": "#0a0a0c",
+    "theme_color": "#0a0a0c",
+    "orientation": "any",
     "icons": [
         {
             "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%231a1a1a'/><circle cx='50' cy='50' r='25' fill='%23fff'/></svg>",

@@ -549,7 +549,7 @@
     z-index: var(--z-sticky);
 }
 
-.day-draweropen {
+.day-drawer.open {
     transform: translateX(0);
 }
 

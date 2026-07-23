@@ -297,7 +297,8 @@ const UI = (() => {
   /* ---------------- Confetti ---------------- */
   function confetti() {
     const colors = ['#7c7aff', '#57d9c4', '#ffb454', '#ff6b8b', '#5aa9ff'];
-    for (let i = 0; i < 24; i++) {
+    const count = window.innerWidth <= 768 ? 12 : 24;
+    for (let i = 0; i < count; i++) {
       const piece = document.createElement('div');
       piece.className = 'confetti-piece';
       piece.style.left = (40 + Math.random() * 20) + 'vw';

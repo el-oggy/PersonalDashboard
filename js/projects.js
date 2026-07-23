@@ -74,20 +74,53 @@ const Projects = (() => {
           <span class="kanban-col-title">${Utils.escapeHtml(col.name)} <span class="kanban-col-count">${cards.length}</span></span>
         </div>
         <div class="kanban-cards" data-col-cards="${col.id}">
-          ${cards.map(c => cardHTML(c)).join('')}
+          ${cards.map(c => cardHTML(c, project)).join('')}
         </div>
         <button class="add-card-btn" data-add-to="${col.id}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add card</button>
       </div>`;
     }).join('');
 
+    const isTouch = window.innerWidth <= 768;
+
     boardEl.querySelectorAll('.kanban-card').forEach(card => {
       card.setAttribute('draggable', 'true');
       card.addEventListener('dragstart', () => card.classList.add('is-dragging'));
       card.addEventListener('dragend', () => card.classList.remove('is-dragging'));
-      card.onclick = () => {
+
+      // Show move buttons on touch devices
+      if (isTouch) {
+        const moveDiv = card.querySelector('.kanban-card-move');
+        if (moveDiv) moveDiv.style.display = 'block';
+        // Wire move button clicks
+        card.querySelectorAll('[data-move-to]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const targetColId = btn.dataset.moveTo;
+            const c = project.cards.find(x => x.id === card.dataset.id);
+            if (!c) return;
+            const wasDone = isDoneColumn(project, c.columnId);
+            c.columnId = targetColId;
+            c.order = project.cards.filter(x => x.columnId === targetColId).length;
+            State.save('projects');
+            const nowDone = isDoneColumn(project, targetColId);
+            if (!wasDone && nowDone) {
+              Achievements.awardXP(15, `Completed task <b>${Utils.escapeHtml(c.title)}</b>`);
+              State.logActivity(`Moved <b>${Utils.escapeHtml(c.title)}</b> to Done`, 'project');
+              UI.confetti();
+            }
+            UI.refreshCurrent();
+            UI.updateSidebarLevel();
+          });
+        });
+      }
+
+      // Tap card to edit (touch also works)
+      card.addEventListener('click', (e) => {
+        // Don't open modal if a move button was clicked
+        if (e.target.closest('[data-move-to]')) return;
         const c = project.cards.find(x => x.id === card.dataset.id);
         openCardModal(c, project);
-      };
+      });
     });
 
     boardEl.querySelectorAll('.kanban-col').forEach(col => {
@@ -124,14 +157,22 @@ const Projects = (() => {
     return project.columns[project.columns.length - 1].id === colId;
   }
 
-  function cardHTML(c) {
+  function cardHTML(c, project) {
     const pClass = c.priority === 'high' ? 'priority-high' : c.priority === 'low' ? 'priority-low' : 'priority-med';
+    const currentColName = (project.columns.find(col => col.id === c.columnId) || {}).name || '';
+    const otherCols = project.columns.filter(col => col.id !== c.columnId);
     return `
     <div class="kanban-card" data-id="${c.id}">
       <div class="kanban-card-title">${Utils.escapeHtml(c.title)}</div>
       <div class="kanban-card-footer">
         <span class="kanban-card-priority ${pClass}">${c.priority || 'med'}</span>
         ${c.due ? `<span class="kanban-card-due">${Utils.formatDate(Utils.keyToDate(c.due), { month: 'short', day: 'numeric' })}</span>` : '<span></span>'}
+      </div>
+      <div class="kanban-card-move" style="display:none;">
+        <span style="font-size:10px; color:var(--text-tertiary);">Move to:</span>
+        <div class="kanban-move-col">
+          ${otherCols.map(col => `<button class="kanban-move-btn" data-move-to="${col.id}">${Utils.escapeHtml(col.name)}</button>`).join('')}
+        </div>
       </div>
     </div>`;
   }

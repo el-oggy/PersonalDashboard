@@ -94,6 +94,10 @@ const SidebarTasks = {
         // Bind item clicks
         list.querySelectorAll('.task-item').forEach(item => {
             item.addEventListener('click', (e) => this.handleTaskClick(e, item.dataset.taskId));
+            item.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                this.openTaskModal(item.dataset.taskId);
+            });
             item.addEventListener('dragstart', (e) => this.handleDragStart(e, item.dataset.taskId));
             item.addEventListener('dragover', (e) => e.preventDefault());
             item.addEventListener('drop', (e) => this.handleDrop(e, item.dataset.taskId));
@@ -157,37 +161,40 @@ const SidebarTasks = {
     /**
      * Open task modal (create or edit)
      */
-    openTaskModal(taskId = null) {
-        const modalBackdrop = document.getElementById('task-modal-backdrop');
-        const modalTitle = document.getElementById('modal-title');
-        const form = document.getElementById('task-form');
-        const taskIdInput = document.getElementById('task-id');
-        const taskName = document.getElementById('task-name');
-        const taskIcon = document.getElementById('task-icon');
-        const taskCategory = document.getElementById('task-category');
-        const taskFavorite = document.getElementById('task-favorite');
+        openTaskModal(taskId = null) {
+            const modalBackdrop = document.getElementById('task-modal-backdrop');
+            const modalTitle = document.getElementById('modal-title');
+            const form = document.getElementById('task-form');
+            const taskIdInput = document.getElementById('task-id');
+            const taskName = document.getElementById('task-name');
+            const taskIcon = document.getElementById('task-icon');
+            const taskCategory = document.getElementById('task-category');
+            const taskFavorite = document.getElementById('task-favorite');
+            const deleteBtn = document.getElementById('delete-task-btn');
 
-        if (taskId) {
-            // Edit mode
-            const task = FlowOSStorage.getTask(taskId);
-            modalTitle.textContent = 'Edit Task';
-            taskIdInput.value = task.id;
-            taskName.value = task.name;
-            taskIcon.value = task.icon;
-            taskCategory.value = task.category;
-            taskFavorite.checked = task.favorite;
-        } else {
-            // Create mode
-            modalTitle.textContent = 'Add New Task';
-            form.reset();
-            taskIdInput.value = '';
-        }
+            if (taskId) {
+                // Edit mode
+                const task = FlowOSStorage.getTask(taskId);
+                modalTitle.textContent = 'Edit Task';
+                taskIdInput.value = task.id;
+                taskName.value = task.name;
+                taskIcon.value = task.icon;
+                taskCategory.value = task.category;
+                taskFavorite.checked = task.favorite;
+                if (deleteBtn) deleteBtn.style.display = 'block';
+            } else {
+                // Create mode
+                modalTitle.textContent = 'Add New Task';
+                form.reset();
+                taskIdInput.value = '';
+                if (deleteBtn) deleteBtn.style.display = 'none';
+            }
 
-        modalBackdrop.classList.add('open');
+            modalBackdrop.classList.add('open');
 
-        // Focus on name input
-        setTimeout(() => taskName.focus(), 100);
-    },
+            // Focus on name input
+            setTimeout(() => taskName.focus(), 100);
+        },
 
     /**
      * Close task modal
@@ -287,6 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalClose = document.getElementById('modal-close');
     const modalCancel = document.getElementById('modal-cancel');
     const taskForm = document.getElementById('task-form');
+    const deleteBtn = document.getElementById('delete-task-btn');
 
     if (modalClose) {
         modalClose.addEventListener('click', () => SidebarTasks.closeTaskModal());
@@ -294,6 +302,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (modalCancel) {
         modalCancel.addEventListener('click', () => SidebarTasks.closeTaskModal());
+    }
+
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            const id = document.getElementById('task-id').value;
+            if (id) {
+                SidebarTasks.deleteTask(id);
+            }
+        });
     }
 
     if (modalBackdrop) {
